@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list/database_helper.dart';
+import 'package:todo_list/todo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,119 +9,186 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Todo-List App',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const TodoApp(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class TodoApp extends StatefulWidget {
+  const TodoApp({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<TodoApp> createState() => _TodoAppState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _TodoAppState extends State<TodoApp> {
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descController = TextEditingController();
+  final dbHelper = DatabaseHelper();
+  List<Todo> _todos = [];
+  int _count = 0;
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    refreshItemList();
+    super.initState();
+  }
+
+  void refreshItemList() async {
+    final todos = await dbHelper.getAllTodos();
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _todos = todos;
     });
+  }
+
+  void searchItems() async {
+    final keyword = _searchController.text.trim();
+    if (keyword.isNotEmpty) {
+      final todos = await dbHelper.getTodoByTitle(keyword);
+      setState(() {
+        _todos = todos;
+      });
+    } else {
+      refreshItemList();
+    }
+  }
+
+  void addItem(String title, String desc) async {
+    final todo =
+        Todo(id: _count, title: title, description: desc, completed: false);
+    await dbHelper.insertTodo(todo);
+    refreshItemList();
+  }
+
+  void updateItem(Todo todo, bool completed) async {
+    final item = Todo(
+      id: todo.id,
+      title: todo.title,
+      description: todo.description,
+      completed: completed,
+    );
+    await dbHelper.updateTodo(item);
+    refreshItemList();
+  }
+
+  void deleteItem(int id) async {
+    await dbHelper.deleteTodo(id);
+    refreshItemList();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text('Todo List'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                labelText: 'Search',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (_) {
+                searchItems();
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _todos.length,
+              itemBuilder: (context, index) {
+                var todo = _todos[index];
+                return ListTile(
+                  leading: todo.completed
+                      ? IconButton(
+                          icon: const Icon(Icons.check_circle),
+                          onPressed: () {
+                            updateItem(todo, !todo.completed);
+                          },
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.radio_button_unchecked),
+                          onPressed: () {
+                            updateItem(todo, !todo.completed);
+                          },
+                        ),
+                  title: Text(todo.title),
+                  subtitle: Text(todo.description),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      deleteItem(todo.id);
+                    },
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Tambah Todo'),
+              content: SizedBox(
+                width: 200,
+                height: 200,
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(hintText: 'Judul todo'),
+                    ),
+                    TextField(
+                      controller: _descController,
+                      decoration:
+                          const InputDecoration(hintText: 'Deskripsi todo'),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Batalkan'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _titleController.clear();
+                    _descController.clear();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Tambah'),
+                  onPressed: () {
+                    addItem(_titleController.text, _descController.text);
+                    _titleController.clear();
+                    _descController.clear();
+                    Navigator.pop(context);
+                    setState(() {
+                      _count = _count + 1;
+                    });
+                  },
+                ),
+              ],
+            ),
+          );
+        },
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
