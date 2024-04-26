@@ -1,0 +1,21 @@
+name: Release workflow
+on:
+    push:
+       branches:
+        - main
+jobs:
+    make_artifact:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Clone repository
+          uses: actions/checkout@v4
+        - name: Set up Flutter
+          uses: subsito/flutter-actions@v2
+          with:
+            flutter-version: 3.19.5
+        - run: flutter pub get
+        - run: flutter build apk
+        - uses: actions/upload-artifact@v5
+          with:
+            name: TodoList
+
