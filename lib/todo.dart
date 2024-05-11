@@ -3,12 +3,27 @@ class Todo {
   final String title;
   final String description;
   final bool completed;
+
   Todo({
     required this.id,
     required this.title,
     required this.description,
     required this.completed,
   });
+
+  Todo copyWith({
+    int? id,
+    String? title,
+    String? description,
+    bool? completed,
+  }) {
+    return Todo(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      completed: completed ?? this.completed,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{

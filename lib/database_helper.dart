@@ -39,7 +39,7 @@ class DatabaseHelper {
         CREATE TABLE 
         IF NOT EXISTS todos 
         (
-          id INTEGER PRIMARY KEY,
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
           title TEXT NOT NULL,
           description TEXT,
           completed INTEGER NOT NULL
@@ -62,13 +62,15 @@ class DatabaseHelper {
   Future<List<Todo>> getTodoByTitle(String title) async {
     var dbClient = await db;
     var todo = await dbClient!
-        .query('todos', where: 'title like ?', whereArgs: [title]);
+        .query('todos', where: 'title like ?', whereArgs: ['%${title.trim()}%']);
     return todo.map((todo) => Todo.fromMap(todo)).toList();
   }
 
   Future<int> insertTodo(Todo todo) async {
     var dbClient = await db;
-    return await dbClient!.insert('todos', todo.toMap());
+    var map = todo.toMap();
+    map.remove('id');
+    return await dbClient!.insert('todos', map);
   }
 
   Future<int> updateTodo(Todo todo) async {
@@ -81,4 +83,14 @@ class DatabaseHelper {
     var dbClient = await db;
     return await dbClient!.delete('todos', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<void> deleteCompletedTodos() async {
+    var dbClient = await db;
+    await dbClient!.delete(
+      'todos',
+      where: 'completed = ?',
+      whereArgs: [1],
+    );
+  }
 }
+
