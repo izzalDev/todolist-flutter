@@ -75,8 +75,31 @@ class _TodoAppState extends State<TodoApp> {
   }
 
   void deleteCompletedItems() async {
-    await dbHelper.deleteCompletedTodos();
-    refreshItemList();
+    final shouldDelete = await _showDeleteConfirmationDialog();
+    if (shouldDelete) {
+      await dbHelper.deleteCompletedTodos();
+      refreshItemList();
+    }
+  }
+
+  Future<bool> _showDeleteConfirmationDialog() async {
+    return await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Konfirmasi Penghapusan'),
+        content: const Text('Apakah Anda yakin ingin menghapus semua todo yang telah selesai?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Tidak'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Ya'),
+          ),
+        ],
+      ),
+    ) ?? false; // Mengembalikan false jika dialog ditutup tanpa memilih
   }
 
   @override

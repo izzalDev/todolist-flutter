@@ -39,7 +39,7 @@ class DatabaseHelper {
         CREATE TABLE 
         IF NOT EXISTS todos 
         (
-          id INTEGER PRIMARY KEY,
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
           title TEXT NOT NULL,
           description TEXT,
           completed INTEGER NOT NULL
@@ -69,7 +69,9 @@ class DatabaseHelper {
 
   Future<int> insertTodo(Todo todo) async {
     var dbClient = await db;
-    return await dbClient!.insert('todos', todo.toMap());
+    Map<String, dynamic> todoMap = todo.toMap();
+    todoMap.remove('id');
+    return await dbClient!.insert('todos', todoMap);
   }
 
   Future<int> updateTodo(Todo todo) async {
