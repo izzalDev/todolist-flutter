@@ -1,16 +1,34 @@
-# todo_list
+# 📝 Aplikasi Todo-List
 
-A new Flutter project.
+Aplikasi Todo-List ini adalah aplikasi yang memungkinkan pengguna untuk mengelola daftar tugas mereka. Aplikasi ini dibangun menggunakan Flutter dan SQLite sebagai database lokal.
 
-## Getting Started
+## 🌟 Fitur
 
-This project is a starting point for a Flutter application.
+- **➕ Tambah Todo**: Pengguna dapat menambahkan todo baru ke dalam daftar.
+- **📝 Edit Todo**: Pengguna dapat mengedit detail todo yang sudah ada.
+- **🗑️ Hapus Todo**: Pengguna dapat menghapus todo dari daftar.
+- **✔️ Tandai Selesai**: Pengguna dapat menandai todo sebagai selesai.
+- **🔍 Cari Todo**: Pengguna dapat mencari todo berdasarkan judul.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Cara Menggunakan
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. **➕ Tambah Todo**: Klik tombol tambah (+) di pojok kanan bawah, masukkan judul dan deskripsi, lalu klik 'Tambah'.
+2. **📝 Edit Todo**: Klik ikon edit pada todo yang ingin diubah, modifikasi detailnya, dan klik 'Simpan'.
+3. **🗑️ Hapus Todo**: Klik ikon hapus pada todo yang ingin dihapus.
+4. **✔️ Tandai Selesai**: Klik ikon lingkaran pada todo untuk menandai sebagai selesai atau belum selesai.
+5. **🔍 Cari Todo**: Masukkan kata kunci pada kolom pencarian di bagian atas dan hasil akan otomatis terfilter.
+6. **🗑️ Hapus Completed**: Klik ikon hapus pada pojok kanan bawah.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Pengembangan
+
+Aplikasi ini dikembangkan menggunakan:
+- Flutter untuk frontend
+- SQLite untuk manajemen data lokal
+
+## 🤝 Kontribusi
+
+Kontribusi untuk pengembangan aplikasi ini sangat dihargai. Silakan fork repositori ini dan buat pull request dengan perubahan atau perbaikan Anda.
+
+## 📜 Lisensi
+
+Aplikasi Todo-List ini dilisensikan di bawah MIT License.
