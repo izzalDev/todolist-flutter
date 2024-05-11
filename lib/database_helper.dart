@@ -61,8 +61,9 @@ class DatabaseHelper {
 
   Future<List<Todo>> getTodoByTitle(String title) async {
     var dbClient = await db;
+    String formattedTitle = title.replaceAll(' ', '%');
     var todo = await dbClient!
-        .query('todos', where: 'title like ?', whereArgs: [title]);
+        .query('todos', where: 'title LIKE ?', whereArgs: ['%$formattedTitle%']);
     return todo.map((todo) => Todo.fromMap(todo)).toList();
   }
 
@@ -72,13 +73,27 @@ class DatabaseHelper {
   }
 
   Future<int> updateTodo(Todo todo) async {
-    var dbClient = await db;
-    return await dbClient!
-        .update('todos', todo.toMap(), where: 'id = ?', whereArgs: [todo.id]);
+    final dbClient = await db;
+    return await dbClient!.update(
+      'todos',
+      todo.toMap(),
+      where: 'id = ?',
+      whereArgs: [todo.id],
+    );
   }
 
   Future<int> deleteTodo(int id) async {
     var dbClient = await db;
     return await dbClient!.delete('todos', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<void> deleteCompletedTodos() async {
+    final dbClient = await db;
+    await dbClient!.delete(
+      'todos',
+      where: 'completed = ?',
+      whereArgs: [1],
+    );
+  }
 }
+
